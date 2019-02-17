@@ -19,7 +19,7 @@ function handleSubmission(window) {
     ipcMain.on('form-submission', (event, argument) => {
         const { file, srcSheet, srcPosition, destSheet, destPosition } = argument;
 
-        var python_exe = app.getAppPath()+ '/python/venv/Scripts/python.exe';
+        var python_exe = './python/venv/Scripts/python.exe';
         var args = [
             './python/macro.py',
             file,

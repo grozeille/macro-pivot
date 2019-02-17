@@ -12,6 +12,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "build": {
+    "extraFiles": [
+      "python"
+    ]
+  },
   "devDependencies": {
     "electron": "^4.0.5"
   },

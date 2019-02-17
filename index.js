@@ -8,7 +8,7 @@ submitForm.addEventListener("submit", function(event){
     event.preventDefault();   // stop the form from submitting
 
     document.getElementById("macroFormButton").setAttribute("disabled", "");
-    document.getElementById("stdout").innerText = "";
+    document.getElementById("stdout").innerText = "Sortie:";
 
     let args = {
         file: document.getElementById("file").value,
