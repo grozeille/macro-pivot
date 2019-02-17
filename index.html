@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/mui.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="mui-container">
+
+                <form id="macroForm" action="#" class="mui-form">
+                    <legend>Macro Pivot</legend>
+                    <div class="mui-row">
+                        <div class="mui-col-md-9">
+                            <div class="mui-textfield mui-textfield--float-label">
+                                <input id="file" type="text" value="test.xlsx">
+                                <label>Fichier excel</label>
+                            </div>
+                        </div>
+                        <div class="mui-col-md-3">
+                                <div class="mui--text-right">
+                                        <button id="fileDialog" type="button" class="mui-btn mui-btn--raised mui-btn">Parcourir</button>
+                                </div>                            
+                        </div>
+                    </div>
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input id="srcSheet" type="text" value="Sheet1">
+                        <label>Onglet de la matrice d'origine</label>
+                    </div>
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input id="srcPosition" type="text" value="D7">
+                        <label>Position de la matrice d'origine</label>
+                    </div>
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input id="destSheet" type="text" value="Sheet1">
+                        <label>Onglet de la matrice de destination</label>
+                    </div>
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input id="destPosition" type="text" value="O16">
+                        <label>Position de la matrice de destination</label>
+                    </div>
+                    <button id="macroFormButton" type="submit" class="mui-btn mui-btn--raised mui-btn--primary">Convertir</button>
+                </form>
+                <div id="stdout-container">
+                    <div id="stdout" class="mui--text-light"></div>
+                </div>
+    </div>
+</body>
+<script>
+    // You can also require other files to run in this process
+    require('./index.js')
+</script>
+</html>
