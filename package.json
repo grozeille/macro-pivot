@@ -14,13 +14,14 @@
   "license": "ISC",
   "build": {
     "extraFiles": [
-      "python"
+      "Python3",
+      "workspace"
     ]
   },
   "devDependencies": {
     "electron": "^4.0.5"
   },
   "dependencies": {
-    "python-shell": "^1.0.7"
+    "htmlspecialchars": "^1.0.5"
   }
 }

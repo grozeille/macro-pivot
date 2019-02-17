@@ -64,7 +64,7 @@ def run_macro(file_path, src_sheet_name, src_table_start, dest_sheet_name, dest_
     # build the dataframe and put into excel
     df = pd.DataFrame(column_rows_dic)
     df = df.set_index(index_name)
-    print(df)
+    print(df.to_string())
 
     wb.sheets[dest_sheet_name].range(dest_table_start).value = df
 

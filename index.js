@@ -1,4 +1,5 @@
 const { ipcRenderer, remote, shell } = require('electron');
+const htmlspecialchars = require('htmlspecialchars');
 const { dialog } = remote;
 const currentWindow = remote.getCurrentWindow();
 
@@ -34,7 +35,7 @@ document.getElementById("fileDialog").addEventListener("click", function(event){
 ipcRenderer.on('stdout' , function(event , data){ 
     console.log(data);
     let div = document.getElementById("stdout");
-    div.innerText = div.innerText + "\n" + data;
+    div.innerHTML = div.innerHTML + "<br/>" + htmlspecialchars(data).replace(/\n/g, '<br/>').replace(/\s/g, '&nbsp;');
     div.scrollIntoView(false);
 });
 
@@ -42,6 +43,6 @@ ipcRenderer.on('process-end' , function(event , code){
     document.getElementById("macroFormButton").removeAttribute("disabled");
 
     let div = document.getElementById("stdout");
-    div.innerText = div.innerText + "\n\n Macro terminée avec le code: "+code;
+    div.innerHTML = div.innerHTML + "<br/><br/> Macro terminée avec le code: "+code;
     div.scrollIntoView(false);
 });

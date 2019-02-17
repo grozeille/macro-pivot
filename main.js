@@ -1,7 +1,5 @@
 const { spawn } = require('child_process');
-
 const {app, BrowserWindow, ipcMain, shell } = require('electron');
-// let {pyshell} =  require('python-shell');
 
 function createWindow () {
     window = new BrowserWindow({width: 800, height: 700});
@@ -19,9 +17,16 @@ function handleSubmission(window) {
     ipcMain.on('form-submission', (event, argument) => {
         const { file, srcSheet, srcPosition, destSheet, destPosition } = argument;
 
-        var python_exe = './python/venv/Scripts/python.exe';
+        var rootPath = app.getAppPath();
+        if(rootPath.indexOf('app.asar') !== -1) {
+            rootPath = rootPath.replace('app.asar', '..\\');
+        }
+
+        console.log("basepath: ", rootPath);
+
+        var python_exe = rootPath+'/Python3/python.exe';
         var args = [
-            './python/macro.py',
+            rootPath+'/workspace/pivot/macro.py',
             file,
             srcSheet,
             srcPosition,
@@ -31,7 +36,11 @@ function handleSubmission(window) {
         console.log("command line: ", python_exe, args);
         window.webContents.send('stdout' , python_exe + " "+ args.join(" "));
 
-        var python = require('child_process').spawn(python_exe, args);
+        var env = Object.create( process.env );
+        env.PYTHONPATH = rootPath+'/Python3';
+
+        var python = require('child_process').spawn(python_exe, args, { env : env, encoding: 'utf8'});
+        python.stdout.setEncoding('utf8');
         python.stdout.on('data',(data) => {
             console.log("data: ", data.toString('utf8'));
             window.webContents.send('stdout' , data);
