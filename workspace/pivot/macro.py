@@ -1,6 +1,7 @@
 import xlwings as xw
 import pandas as pd
 import sys
+import logging
 
 def run_macro(file_path, src_sheet_name, src_table_start, dest_sheet_name, dest_table_start):
     wb = xw.Book(file_path)
@@ -26,10 +27,8 @@ def run_macro(file_path, src_sheet_name, src_table_start, dest_sheet_name, dest_
         if value is not None:
             max_x += 1
 
-    # get all values
+    # get all values to retrieve the rows/columns
     column_list = []
-    cpt_x = table_start[1] + 1
-    cpt_y = table_start[0] + 1
 
     for y in range(table_start[0] + 1, max_y + 1):
         for x in range(table_start[1] + 1, max_x + 1):
@@ -39,13 +38,22 @@ def run_macro(file_path, src_sheet_name, src_table_start, dest_sheet_name, dest_
 
     column_list = list(set(column_list))
     column_list.sort()
+
+    row_list = []
+    for y in range(table_start[0] + 1, max_y + 1):
+        value = sht.range(y, table_start[1] + 1).value
+        if value is not None:
+            row_list.append(value)
+    
+    row_list = list(set(row_list))
+    row_list.sort()
     
     # create a dictionary of all columns with all the rows
     column_rows_dic = {}
-    column_rows_dic.update({index_name: column_list})
+    column_rows_dic.update({index_name: row_list})
     for go in column_list:
-        rows_list = [None] * len(column_list)
-        column_rows_dic.update({go : rows_list})
+        column_rows_list = [None] * len(row_list)
+        column_rows_dic.update({go : column_rows_list})
 
     # scan the table to fill the rows
     for y in range(table_start[0] + 1, max_y + 1):
@@ -57,9 +65,12 @@ def run_macro(file_path, src_sheet_name, src_table_start, dest_sheet_name, dest_
             value = sht.range(y, x).value
             if value is None:
                 continue
-            rows_list = column_rows_dic[value]
-            index_column = column_list.index(column)
-            rows_list[index_column] = row_value
+            column_rows_list = column_rows_dic[value]
+            index_column = row_list.index(column)
+            if column_rows_list[index_column] is not None:
+                column_rows_list[index_column] += '\n' + row_value
+            else:
+                column_rows_list[index_column] = row_value
 
     # build the dataframe and put into excel
     df = pd.DataFrame(column_rows_dic)
@@ -69,13 +80,6 @@ def run_macro(file_path, src_sheet_name, src_table_start, dest_sheet_name, dest_
     wb.sheets[dest_sheet_name].range(dest_table_start).value = df
 
 if __name__ == '__main__':
-
-    #file_path = r'test.xlsx'
-    #src_sheet_name = 'Sheet1'
-    #src_table_start = 'D7'
-    #dest_sheet_name = 'Sheet1'
-    #dest_table_start = 'O16'
-
     file_path = sys.argv[1]
     src_sheet_name = sys.argv[2]
     src_table_start = sys.argv[3]

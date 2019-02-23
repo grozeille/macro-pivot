@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/mui.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="left-panel" class="split split-horizontal">
+    <div id="file-panel" class="split content">
+        <div id="file-container">
+            Files
+        </div>
+    </div>
+</div>
+<div id="central-panel" class="split split-horizontal">
+    <div id="editor-panel" class="split content">
+        
+        <ul class="mui-tabs__bar">
+            <li class="mui--is-active"><a data-mui-toggle="tab" data-mui-controls="macro-tab">Executer</a></li>
+            <li><a data-mui-toggle="tab" data-mui-controls="editor-tab">Editeur</a></li>
+        </ul>
+
+        <div class="mui-tabs__pane mui--is-active" id="macro-tab">
+            <div id="central-container" class="mui-container">
+                <form id="macroForm" action="#" class="mui-form">
+                    <div class="mui-row">
+                        <div class="mui-col-md-9">
+                            <div class="mui-textfield mui-textfield--float-label">
+                                <input id="file" type="text" value="test.xlsx">
+                                <label>Fichier excel</label>
+                            </div>
+                        </div>
+                        <div class="mui-col-md-3">
+                                <div class="mui--text-right">
+                                        <button id="fileDialog" type="button" class="mui-btn mui-btn--raised mui-btn">Parcourir</button>
+                                </div>                            
+                        </div>
+                    </div>
+                    <button id="macroFormButton" type="submit" class="mui-btn mui-btn--raised mui-btn--primary">Executer</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="mui-tabs__pane" id="editor-tab">
+            <div id="editor-container"></div>
+        </div>
+
+    </div>
+    <div id="stdout-panel" class="split content">
+        <div id="stdout-container">
+            <div id="stdout" class="mui--text-light"></div>
+        </div>
+    </div>
+</div>
+
+
+
+                
+    
+</body>
+<script>
+    // You can also require other files to run in this process
+    require('./mui.min.js')
+    require('../build/index.js')
+</script>
+</html>

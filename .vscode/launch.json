@@ -5,18 +5,26 @@
       "name": "Python: Current File",
       "type": "python",
       "request": "launch",
-      "program": "${file}"
+      "program": "${file}",
+      "args": [
+        "C:\\Users\\Mathias\\Work\\Projects\\excel-macros\\pivot-2\\test.xlsx",
+        "Sheet1",
+        "B2",
+        "Sheet1",
+        "B15"
+      ]
     },
     {
       "name": "Debug Main Process",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceRoot}",
-      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
-      "windows": {
-        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
-      },
-      "args" : ["."]
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": [
+          "dev"
+      ],
+      "autoAttachChildProcesses": true,
+      "internalConsoleOptions": "openOnFirstSessionStart",
+      "console": "integratedTerminal"
     }
   ]
 }
