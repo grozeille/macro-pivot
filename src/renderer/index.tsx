@@ -40,34 +40,3 @@ ReactDOM.render(
         </SplitPane>
     </div>,
     document.querySelector("#app"));
-
-// configure the editor
-const code = ["import xlwings as xw",
-    "import pandas as pd",
-    "import sys",
-    "import logging",
-    "",
-    "def run_macro(file_path, src_sheet_name, src_table_start, dest_sheet_name, dest_table_start):",
-    "    wb = xw.Book(file_path)",
-    "    sht = wb.sheets[src_sheet_name]"].join("\n");
-
-// tslint:disable-next-line: no-var-requires
-const chromeTheme = require("./themes/Chrome DevTools.json");
-monaco.editor.defineTheme("chrome", chromeTheme);
-monaco.editor.setTheme("chrome");
-
-const editorContainer = document.getElementById("editor-container")!;
-const editor = monaco.editor.create(editorContainer, {
-    language: "python",
-    theme: "vs-dark",
-    value: code,
-});
-
-monaco.editor.setTheme("chrome");
-
-function outputsize() {
-    editor.layout();
-}
-outputsize();
-
-new ResizeObserver(outputsize).observe(document.getElementById("editor-container")!);
