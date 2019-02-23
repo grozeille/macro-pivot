@@ -25,6 +25,28 @@
       "autoAttachChildProcesses": true,
       "internalConsoleOptions": "openOnFirstSessionStart",
       "console": "integratedTerminal"
+    },
+    {
+      
+      "name": "Launch and Debug",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron-webpack",
+      "runtimeArgs": [
+          "dev"
+      ],
+      "autoAttachChildProcesses": true,
+      "internalConsoleOptions": "openOnFirstSessionStart",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Attach",
+      "type": "node",
+      "request": "attach",
+      "port": 5858,
+      "address": "127.0.0.1",
+      "restart": false,
+      "sourceMaps": true
     }
   ]
 }

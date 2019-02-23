@@ -3,9 +3,11 @@ import * as path from "path";
 import { format as formatUrl } from "url";
 import {MacroArguments} from "../common/MacroArguments";
 import {spawn} from "child_process";
+import encoding from "text-encoding";
 
 let mainWindow: Electron.BrowserWindow | null;
 const isDevelopment = process.env.NODE_ENV !== "production";
+const decoder = new encoding.TextDecoder("utf-8");
 
 function createWindow() {
     mainWindow = new BrowserWindow({width: 1000, height: 800});
@@ -46,11 +48,14 @@ function createWindow() {
 function handleSubmission(window: Electron.BrowserWindow) {
     ipcMain.on("form-submission", (argument: MacroArguments) => {
         let rootPath = app.getAppPath();
-        if (rootPath.indexOf("app.asar") !== -1) {
-            rootPath = rootPath.replace("app.asar", "..");
+        if (rootPath.indexOf("default_app.asar") !== -1) {
+            rootPath = rootPath.replace("default_app.asar", "..\\..\\..\\..");
         }
 
         console.log("basepath: ", rootPath);
+
+        window.webContents.send("stdout" , null);
+        window.webContents.send("stdout" , "Sortie:");
 
         const pythonExe = rootPath + "\\Python3\\python.exe";
         const args: ReadonlyArray<string> = [
@@ -66,12 +71,18 @@ function handleSubmission(window: Electron.BrowserWindow) {
         const python = spawn(pythonExe, args, { env });
         python.stdout.setEncoding("utf8");
         python.stdout.on("data", (data: any) => {
-            console.log("data: ", data.toString("utf8"));
+            const dataString = decoder.decode(data);
+            console.log("data: ", dataString);
             window.webContents.send("stdout" , data);
         });
         python.stderr.on("data", (data: any) => {
-            console.log("data: ", data.toString("utf8"));
-            window.webContents.send("stdout" , data);
+            const dataString = decoder.decode(data);
+            console.log("data: ", dataString);
+            window.webContents.send("stdout" , dataString);
+        });
+        python.on("error", (err: any) => {
+            console.log(`error when starting process ${err}`);
+            window.webContents.send("process-end", -1);
         });
         python.on("close", (code: any) => {
             console.log(`child process exited with code ${code}`);
