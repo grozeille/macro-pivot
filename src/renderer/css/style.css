@@ -45,11 +45,19 @@ html, body {
     border-left: 5px solid rgba(0, 0, 0, 0.5);
     border-right: 5px solid rgba(0, 0, 0, 0.5);
 }
+
 .Resizer.disabled {
   cursor: not-allowed;
 }
+
 .Resizer.disabled:hover {
   border-color: transparent;
+}
+
+
+.Pane {
+    overflow: auto;
+    overflow: hidden;
 }
 
 #app-panel, #app, #editor-tab-panel {
@@ -57,8 +65,6 @@ html, body {
 }
 
 #file-panel {
-    display: flex;
-    flex-flow: column;  
     height: 100%;
 }
 
@@ -69,47 +75,38 @@ html, body {
 
 #macro-tab {
     padding-top: 20px;
-    /*display: flex;
-    flex-flow: column;*/
 }
 
 #editor-container {
     height: 100%;
     width: 100%;
-    /*height: 300px;*/
-    /*height: calc(100% - 50px);*/
 }
 
 #central-container {
     height: 100%;
+    width: 100%;
 }
 
 #editor-tab {
-    /*padding-top: 20px;*/
-    /*height: 100%;*/
-    /*
-    550.750
-    */
+    /* all height except the tab header */
     height: calc(100% - 50px);
 }
 
 #editor-panel {
-    /* bug with splitPanel height: 100%; */
+    height: 100%;
     width: 100%;
-    overflow-y: hidden;
 }
 
 #stdout-panel {
     height: 100%;
     width: 100%;
-    display: flex;
-    flex-flow: column;
 }
 
 #stdout-container {
     background-color: #444;
     overflow-y: scroll;
-    height: 100%;
+    /* all height except the padding */
+    height: calc(100% - 20px);
     padding: 10px;
     font-family: Consolas;
 }

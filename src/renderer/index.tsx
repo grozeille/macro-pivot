@@ -16,8 +16,8 @@ ReactDOM.render(
     <div id="app-panel">
         <SplitPane split="vertical" minSize={200} defaultSize={300}>
             <LeftPanel />
-            <SplitPane split="horizontal" minSize={200} primary="first">
-            <CentralPanel />
+            <SplitPane split="horizontal" minSize={200} primary="second">
+                <CentralPanel />
                 <StdoutPanel />
             </SplitPane>
         </SplitPane>
