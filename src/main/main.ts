@@ -1,6 +1,6 @@
 import {app, BrowserWindow, ipcMain} from "electron";
 import * as path from "path";
-import { lstatSync, readdirSync } from "fs";
+import { lstatSync, readdirSync, readFileSync } from "fs";
 import { format as formatUrl } from "url";
 import {MacroArguments} from "../common/MacroArguments";
 import {spawn} from "child_process";
@@ -151,10 +151,18 @@ function handleRefreshFiles(window: Electron.BrowserWindow) {
     });
 }
 
+function handleOpenFile(window: Electron.BrowserWindow) {
+    ipcMain.on("open-file", (event: any, filePath: string) => {
+        const contents = readFileSync(filePath, "utf8");
+        window.webContents.send("file-opened" , contents);
+    });
+}
+
 app.on("ready", () => {
     const w = createWindow();
     handleSubmission(w);
     handleRefreshFiles(w);
+    handleOpenFile(w);
 });
 
 app.on("window-all-closed", () => {
