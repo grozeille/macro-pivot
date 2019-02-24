@@ -16,6 +16,7 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 interface ILeftPanelState {
     data: ProjectList;
     collapse: Map<string, boolean>;
+    selected: string;
 }
 
 export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
@@ -24,14 +25,15 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
         this.state = {
             collapse: new Map(),
             data: new ProjectList(),
+            selected: "",
         };
 
         ipcRenderer.on("files-refreshed" , (event: Event, data: ProjectList) => {
             const collapse = new Map();
-            data.Projects.forEach((element: Project) => {
-                collapse.set(element.Name, true);
+            data.Projects.forEach((project: Project) => {
+                collapse.set(project.Path, true);
             });
-            this.setState({ data, collapse });
+            this.setState({ data, collapse, selected: "" });
         });
     }
 
@@ -60,10 +62,10 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
                             <FolderIcon />
                         </ListItemIcon>
                         <ListItemText inset primary={p.Name} />
-                        {this.state.collapse.get(p.Name) ? <ExpandLess /> : <ExpandMore />}
+                        {this.state.collapse.get(p.Path) ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
                     <Collapse
-                        in={this.state.collapse.get(p.Name)}
+                        in={this.state.collapse.get(p.Path)}
                         timeout="auto"
                         unmountOnExit
                         key={p.Name + "#collapse"}>
@@ -81,6 +83,7 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
             return (
                 <ListItem
                     onClick={() => this.handleFileClick(f)}
+                    selected={this.state.selected === f.Path}
                     button
                     key={project.Name + "#files#" + f.Name}
                     style={{ paddingLeft: 30 }}>
@@ -94,15 +97,18 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
     }
 
     private handleProjectClick(project: Project) {
-        this.state.collapse.set(project.Name, !this.state.collapse.get(project.Name));
-        // force refresh state
-        this.setState({
-            collapse: this.state.collapse,
-            data: this.state.data,
+        this.setState((prevState, props) => {
+            prevState.collapse.set(project.Path, !this.state.collapse.get(project.Path));
+            return {
+                collapse: prevState.collapse,
+            };
         });
     }
 
     private handleFileClick(file: PythonFile) {
+        this.setState({
+            selected: file.Path,
+        });
         ipcRenderer.send("open-file", file.Path);
     }
 }
