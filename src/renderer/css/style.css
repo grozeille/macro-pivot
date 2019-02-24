@@ -1,10 +1,5 @@
 html, body {
     height: 100%;
-    background-color: #F6F6F6;
-}
-
-.content {
-    background-color: #FFF;
 }
 
 .Resizer {
@@ -99,7 +94,7 @@ html, body {
 }
 
 #editor-panel {
-    height: 100%;
+    /* bug with splitPanel height: 100%; */
     width: 100%;
     overflow-y: hidden;
 }
@@ -117,29 +112,4 @@ html, body {
     height: 100%;
     padding: 10px;
     font-family: Consolas;
-}
-
-.split {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.split.split-horizontal,
-.gutter.gutter-horizontal {
-    height: 100%;
-    float: left;
-}
-.gutter {
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-position: 50%;
-}
-.gutter.gutter-horizontal {
-    cursor: col-resize;
-}
-.gutter.gutter-vertical {
-    cursor: row-resize;
 }

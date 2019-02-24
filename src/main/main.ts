@@ -8,10 +8,13 @@ import encoding from "text-encoding";
 import { Project } from "../common/Project";
 import { PythonFile } from "../common/PythonFile";
 import { ProjectList } from "../common/ProjectList";
+import { PythonFileContent } from "../common/PythonFileContent";
 
 let mainWindow: Electron.BrowserWindow | null;
 const isDevelopment = process.env.NODE_ENV !== "production";
 const decoder = new encoding.TextDecoder("utf-8");
+
+let lastOpenedFiled: string | null = null;
 
 function createWindow() {
     mainWindow = new BrowserWindow({width: 1000, height: 800});
@@ -153,8 +156,15 @@ function handleRefreshFiles(window: Electron.BrowserWindow) {
 
 function handleOpenFile(window: Electron.BrowserWindow) {
     ipcMain.on("open-file", (event: any, filePath: string) => {
+
+        if (lastOpenedFiled === filePath) {
+            return;
+        }
+        lastOpenedFiled = filePath;
+
         const contents = readFileSync(filePath, "utf8");
-        window.webContents.send("file-opened" , contents);
+        const pythonFileContent = new PythonFileContent(contents, filePath);
+        window.webContents.send("file-opened" , pythonFileContent);
     });
 }
 

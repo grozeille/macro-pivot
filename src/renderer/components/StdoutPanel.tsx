@@ -15,8 +15,10 @@ export default class StdoutPanel extends React.Component<{}, {}> {
 
     public render() {
         return (
-            <div id="stdout-container">
-                <div id="stdout" className="mui--text-light" ref={this.stdoutRef}>
+            <div id="stdout-panel">
+                <div id="stdout-container">
+                    <div id="stdout" className="mui--text-light" ref={this.stdoutRef}>
+                    </div>
                 </div>
             </div>
         );

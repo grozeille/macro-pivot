@@ -37,10 +37,12 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
 
     public render() {
         return (
-            <div id="file-container">
-                <List component="nav">
-                    {this.refreshProjects()}
-                </List>
+            <div id="file-panel">
+                <div id="file-container">
+                    <List component="nav">
+                        {this.refreshProjects()}
+                    </List>
+                </div>
             </div>
         );
     }

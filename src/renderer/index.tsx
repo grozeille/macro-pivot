@@ -14,17 +14,11 @@ const styleCss = require("./css/style.css");
 
 ReactDOM.render(
     <div id="app-panel">
-        <SplitPane split="vertical" minSize={200}>
-            <div id="file-panel" className="split content">
-                <LeftPanel />
-            </div>
-            <SplitPane split="horizontal" minSize={500}>
-                <div id="editor-panel" className="split content">
-                    <CentralPanel />
-                </div>
-                <div id="stdout-panel" className="split content">
-                    <StdoutPanel />
-                </div>
+        <SplitPane split="vertical" minSize={200} defaultSize={300}>
+            <LeftPanel />
+            <SplitPane split="horizontal" minSize={200} primary="first">
+            <CentralPanel />
+                <StdoutPanel />
             </SplitPane>
         </SplitPane>
     </div>,
