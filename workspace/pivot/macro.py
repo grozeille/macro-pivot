@@ -81,9 +81,13 @@ def run_macro(file_path, src_sheet_name, src_table_start, dest_sheet_name, dest_
 
 if __name__ == '__main__':
     file_path = sys.argv[1]
-    src_sheet_name = sys.argv[2]
-    src_table_start = sys.argv[3]
-    dest_sheet_name = sys.argv[4]
-    dest_table_start = sys.argv[5]
+    #src_sheet_name = sys.argv[2]
+    #src_table_start = sys.argv[3]
+    #dest_sheet_name = sys.argv[4]
+    #dest_table_start = sys.argv[5]
+    src_sheet_name = "Sheet1"
+    src_table_start = "B2"
+    dest_sheet_name = "Sheet1"
+    dest_table_start = "B14"
 
     run_macro(file_path, src_sheet_name, src_table_start, dest_sheet_name, dest_table_start)

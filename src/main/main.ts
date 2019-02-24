@@ -1,9 +1,13 @@
 import {app, BrowserWindow, ipcMain} from "electron";
 import * as path from "path";
+import { lstatSync, readdirSync } from "fs";
 import { format as formatUrl } from "url";
 import {MacroArguments} from "../common/MacroArguments";
 import {spawn} from "child_process";
 import encoding from "text-encoding";
+import { Project } from "../common/Project";
+import { PythonFile } from "../common/PythonFile";
+import { ProjectList } from "../common/ProjectList";
 
 let mainWindow: Electron.BrowserWindow | null;
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -45,14 +49,30 @@ function createWindow() {
     return mainWindow;
 }
 
+function getAppPath(): string {
+    let rootPath = app.getAppPath();
+    if (rootPath.indexOf("\\default_app.asar") !== -1) {
+        rootPath = rootPath.replace("\\default_app.asar", "\\..\\..\\..\\..");
+    } else if (rootPath.indexOf("\\app.asar") !== -1) {
+        rootPath = rootPath.replace("\\app.asar", "\\..");
+    }
+    return rootPath;
+}
+
+function getWorkspacePath(): string {
+    const rootPath = getAppPath();
+    let workspacePath = "";
+    if (process.env.WORKSPACE) {
+        workspacePath = process.env.WORKSPACE;
+    } else {
+        workspacePath = rootPath + "\\workspace";
+    }
+    return workspacePath;
+}
+
 function handleSubmission(window: Electron.BrowserWindow) {
     ipcMain.on("form-submission", (event: any, argument: MacroArguments) => {
-        let rootPath = app.getAppPath();
-        if (rootPath.indexOf("\\default_app.asar") !== -1) {
-            rootPath = rootPath.replace("\\default_app.asar", "\\..\\..\\..\\..");
-        } else if (rootPath.indexOf("\\app.asar") !== -1) {
-            rootPath = rootPath.replace("\\app.asar", "\\..");
-        }
+        const rootPath = getAppPath();
         console.log("base path: ", rootPath);
 
         let pythonPath = "";
@@ -63,12 +83,7 @@ function handleSubmission(window: Electron.BrowserWindow) {
         }
         console.log("python home: ", pythonPath);
 
-        let workspacePath = "";
-        if (process.env.WORKSPACE) {
-            workspacePath = process.env.WORKSPACE;
-        } else {
-            workspacePath = rootPath + "\\workspace";
-        }
+        const workspacePath = getWorkspacePath();
         console.log("workspace: ", workspacePath);
 
         window.webContents.send("stdout" , null);
@@ -109,9 +124,37 @@ function handleSubmission(window: Electron.BrowserWindow) {
     });
 }
 
+function handleRefreshFiles(window: Electron.BrowserWindow) {
+    ipcMain.on("refresh-files", (event: any) => {
+        const workspacePath = getWorkspacePath();
+
+        const isDirectory = (source: Project) => lstatSync(source.Path).isDirectory();
+        const isFile = (source: PythonFile) => lstatSync(source.Path).isFile();
+
+        const getDirectories = (source: string) =>
+            readdirSync(source)
+            .map((name: string) => {
+                return new Project(name, path.join(source, name));
+            })
+            .filter(isDirectory)
+            .filter((project: Project) => !project.Name.startsWith("."))
+            .map((project: Project) => {
+                project.PythonFiles = readdirSync(project.Path)
+                .map((name: string) => {
+                    return new PythonFile(name, path.join(project.Path, name));
+                })
+                .filter(isFile);
+                return project;
+            });
+        const projectList = getDirectories(workspacePath);
+        window.webContents.send("files-refreshed" , new ProjectList(projectList));
+    });
+}
+
 app.on("ready", () => {
     const w = createWindow();
     handleSubmission(w);
+    handleRefreshFiles(w);
 });
 
 app.on("window-all-closed", () => {

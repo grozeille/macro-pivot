@@ -2,18 +2,9 @@ import React from "react";
 import ExecutionMacroPanel from "./ExecutionMacroPanel";
 import EditorPanel from "./EditorPanel";
 
-interface ICentralPanelProps {
-    someDefaultValue?: string;
-}
-
-interface ICentralPanelState {
-    someValue: string;
-}
-
-export default class CentralPanel extends React.Component<ICentralPanelProps, ICentralPanelState> {
-    constructor(props: ICentralPanelProps) {
+export default class CentralPanel extends React.Component<{}, {}> {
+    constructor(props: {}) {
         super(props);
-        this.state = { someValue: this.props.someDefaultValue || "" };
     }
 
     public render() {
