@@ -1,5 +1,5 @@
-import React, { FormEvent } from "react";
-import {ipcRenderer, remote, shell} from "electron";
+import React from "react";
+import {ipcRenderer, remote} from "electron";
 
 const dialog = remote.dialog;
 

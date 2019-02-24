@@ -1,20 +1,9 @@
-import * as electron from "electron";
-import {ipcRenderer, remote, shell} from "electron";
 import SplitPane from "react-split-pane";
-import * as he from "he";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import MonacoEditor from "react-monaco-editor";
-// import * as monaco from "monaco-editor";
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import { ResizeObserver } from "resize-observer";
 import LeftPanel from "./components/LeftPanel";
 import StdoutPanel from "./components/StdoutPanel";
 import CentralPanel from "./components/CentralPanel";
-
-const app = remote.app;
-const browserWindow = remote.BrowserWindow;
-const dialog = remote.dialog;
 
 // import * as css from "./css/mui.min.css";
 // https://stackoverflow.com/questions/41336858/how-to-import-css-modules-with-typescript-react-and-webpack

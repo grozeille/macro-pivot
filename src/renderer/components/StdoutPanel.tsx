@@ -1,5 +1,5 @@
 import React from "react";
-import {ipcRenderer, remote, shell} from "electron";
+import {ipcRenderer} from "electron";
 import * as he from "he";
 
 export default class StdoutPanel extends React.Component<{}, {}> {

@@ -46,27 +46,45 @@ function createWindow() {
 }
 
 function handleSubmission(window: Electron.BrowserWindow) {
-    ipcMain.on("form-submission", (argument: MacroArguments) => {
+    ipcMain.on("form-submission", (event: any, argument: MacroArguments) => {
         let rootPath = app.getAppPath();
-        if (rootPath.indexOf("default_app.asar") !== -1) {
-            rootPath = rootPath.replace("default_app.asar", "..\\..\\..\\..");
+        if (rootPath.indexOf("\\default_app.asar") !== -1) {
+            rootPath = rootPath.replace("\\default_app.asar", "\\..\\..\\..\\..");
+        } else if (rootPath.indexOf("\\app.asar") !== -1) {
+            rootPath = rootPath.replace("\\app.asar", "\\..");
         }
+        console.log("base path: ", rootPath);
 
-        console.log("basepath: ", rootPath);
+        let pythonPath = "";
+        if (process.env.PYTHONPATH) {
+            pythonPath = process.env.PYTHONPATH;
+        } else {
+            pythonPath = rootPath + "\\Python3";
+        }
+        console.log("python home: ", pythonPath);
+
+        let workspacePath = "";
+        if (process.env.WORKSPACE) {
+            workspacePath = process.env.WORKSPACE;
+        } else {
+            workspacePath = rootPath + "\\workspace";
+        }
+        console.log("workspace: ", workspacePath);
 
         window.webContents.send("stdout" , null);
         window.webContents.send("stdout" , "Sortie:");
 
-        const pythonExe = rootPath + "\\Python3\\python.exe";
+        const pythonExe = pythonPath + "\\python.exe";
         const args: ReadonlyArray<string> = [
-            rootPath + "\\workspace\\pivot\\macro.py",
+            workspacePath + "\\pivot\\macro.py",
             argument.file,
         ];
         console.log("command line: ", pythonExe, args);
         window.webContents.send("stdout" , pythonExe + " " + args.join(" "));
 
         const env = Object.create( process.env );
-        env.PYTHONPATH = rootPath + "\\Python3";
+        env.PYTHONPATH = pythonPath;
+        env.PYTHONIOENCODING = "UTF-8";
 
         const python = spawn(pythonExe, args, { env });
         python.stdout.setEncoding("utf8");

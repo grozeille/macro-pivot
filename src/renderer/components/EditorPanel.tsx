@@ -1,5 +1,5 @@
 import React from "react";
-import MonacoEditor from "react-monaco-editor";
+// import MonacoEditor from "react-monaco-editor";
 // import * as monaco from "monaco-editor";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ResizeObserver } from "resize-observer";
