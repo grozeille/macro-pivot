@@ -35,10 +35,11 @@ v1
 
 * save a file
 * add a new package / file
-* execute button from the editor
 
 v2
 
 * dynamic form for macro input
 * python auto-complete
 * versionning of the script and diff
+
+![alt text](https://raw.githubusercontent.com/grozeille/macro-pivot/master/screenshot-01.png)
