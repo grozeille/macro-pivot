@@ -110,3 +110,43 @@ html, body {
     padding: 10px;
     font-family: Consolas;
 }
+
+#app-toolbar {
+    background-color: #eeeeee;
+    color: #3a3a3a;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #d0d0d0;
+}
+
+.SplitPane {
+    /* all height except the header */
+    height: calc(100% - 46px);
+}
+
+.app-toolbar-button {
+    padding: 10px;
+    display: inline-block;
+    cursor: pointer;
+    line-height: 24px;
+    height: 24px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: rgba(0, 0, 0, 0);
+}
+
+.app-toolbar-button > span {
+    display: flex;
+}
+
+.app-toolbar-button > span > svg {
+    margin-right: 5px;
+}
+
+
+.app-toolbar-button:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #03a9f4;
+}

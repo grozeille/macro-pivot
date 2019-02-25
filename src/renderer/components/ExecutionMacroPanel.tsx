@@ -78,16 +78,24 @@ export default class ExecutionMacroPanel extends React.Component<IExecutionMacro
 
     private handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        this.execute();
+    }
+
+    private execute() {
         this.setState({ running: true});
 
         const args = {
             file: this.state.filePath,
         };
-        ipcRenderer.send("form-submission", args);
+        ipcRenderer.send("execute", args);
     }
 
     private handleOnMacroExecuted() {
-        ipcRenderer.on("process-end" , (event: Event, data: string) => {
+        ipcRenderer.on("trigger-execute", (event: Event) => {
+            this.execute();
+        });
+
+        ipcRenderer.on("process-end", (event: Event, data: string) => {
             this.setState({ running: false});
         });
     }

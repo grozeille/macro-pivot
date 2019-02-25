@@ -73,8 +73,8 @@ function getWorkspacePath(): string {
     return workspacePath;
 }
 
-function handleSubmission(window: Electron.BrowserWindow) {
-    ipcMain.on("form-submission", (event: any, argument: MacroArguments) => {
+function handleExecute(window: Electron.BrowserWindow) {
+    ipcMain.on("execute", (event: any, argument: MacroArguments) => {
         const rootPath = getAppPath();
         console.log("base path: ", rootPath);
 
@@ -168,11 +168,18 @@ function handleOpenFile(window: Electron.BrowserWindow) {
     });
 }
 
+function handleTriggerExecute(window: Electron.BrowserWindow) {
+    ipcMain.on("trigger-execute", (event: any) => {
+        window.webContents.send("trigger-execute");
+    });
+}
+
 app.on("ready", () => {
     const w = createWindow();
-    handleSubmission(w);
+    handleExecute(w);
     handleRefreshFiles(w);
     handleOpenFile(w);
+    handleTriggerExecute(w);
 });
 
 app.on("window-all-closed", () => {
