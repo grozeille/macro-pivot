@@ -98,6 +98,10 @@ export default class ExecutionMacroPanel extends React.Component<IExecutionMacro
         ipcRenderer.on("process-end", (event: Event, data: string) => {
             this.setState({ running: false});
         });
+
+        ipcRenderer.on("trigger-stop", (event: Event) => {
+            ipcRenderer.send("stop");
+        });
     }
 
 }

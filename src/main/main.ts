@@ -3,7 +3,7 @@ import * as path from "path";
 import { lstatSync, readdirSync, readFileSync } from "fs";
 import { format as formatUrl } from "url";
 import {MacroArguments} from "../common/MacroArguments";
-import {spawn} from "child_process";
+import {spawn, ChildProcess} from "child_process";
 import encoding from "text-encoding";
 import { Project } from "../common/Project";
 import { PythonFile } from "../common/PythonFile";
@@ -15,6 +15,7 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 const decoder = new encoding.TextDecoder("utf-8");
 
 let lastOpenedFiled: string | null = null;
+let pythonProcess: ChildProcess | null = null;
 
 function createWindow() {
     mainWindow = new BrowserWindow({width: 1000, height: 800});
@@ -104,30 +105,35 @@ function handleExecute(window: Electron.BrowserWindow) {
         env.PYTHONPATH = pythonPath;
         env.PYTHONIOENCODING = "UTF-8";
 
-        const python = spawn(pythonExe, args, { env });
-        python.stdout.setEncoding("utf8");
-        python.stdout.on("data", (data: any) => {
+        pythonProcess = spawn(pythonExe, args, { env });
+        pythonProcess.stdout.setEncoding("utf8");
+        pythonProcess.stdout.on("data", (data: any) => {
             const dataString = decoder.decode(data);
             console.log("data: ", dataString);
             window.webContents.send("stdout" , data);
         });
-        python.stderr.on("data", (data: any) => {
+        pythonProcess.stderr.on("data", (data: any) => {
             const dataString = decoder.decode(data);
             console.log("data: ", dataString);
             window.webContents.send("stdout" , dataString);
         });
-        python.on("error", (err: any) => {
+        pythonProcess.on("error", (err: any) => {
             console.log(`error when starting process ${err}`);
             window.webContents.send("process-end", -1);
+            pythonProcess = null;
         });
-        python.on("close", (code: any) => {
+        pythonProcess.on("close", (code: any) => {
             console.log(`child process exited with code ${code}`);
             window.webContents.send("process-end", code);
+            pythonProcess = null;
         });
     });
 }
 
 function handleRefreshFiles(window: Electron.BrowserWindow) {
+    ipcMain.on("trigger-refresh-files", (event: any) => {
+        window.webContents.send("trigger-refresh-files");
+    });
     ipcMain.on("refresh-files", (event: any) => {
         const workspacePath = getWorkspacePath();
 
@@ -174,12 +180,24 @@ function handleTriggerExecute(window: Electron.BrowserWindow) {
     });
 }
 
+function handleTriggerStop(window: Electron.BrowserWindow) {
+    ipcMain.on("trigger-stop", (event: any) => {
+        window.webContents.send("trigger-stop");
+    });
+    ipcMain.on("stop", (event: any) => {
+        if (pythonProcess !== null) {
+            pythonProcess.kill("-9");
+        }
+    });
+}
+
 app.on("ready", () => {
     const w = createWindow();
     handleExecute(w);
     handleRefreshFiles(w);
     handleOpenFile(w);
     handleTriggerExecute(w);
+    handleTriggerStop(w);
 });
 
 app.on("window-all-closed", () => {

@@ -6,6 +6,7 @@ import SplitPane from "react-split-pane";
 import LoopIcon from "@material-ui/icons/Loop";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
+import StopIcon from "@material-ui/icons/Stop";
 import {ipcRenderer, remote} from "electron";
 import Button from "@material-ui/core/Button";
 
@@ -49,6 +50,13 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
                         <PlayArrowIcon style={{ marginRight: 5}} ></PlayArrowIcon>
                         Executer
                     </Button>
+                    <Button
+                        style={{ borderRadius: 0 }}
+                        onClick={() => this.onStopClick()}
+                        disabled={!this.state.execution}>
+                        <StopIcon style={{ marginRight: 5}} ></StopIcon>
+                        Stopper
+                    </Button>
                 </div>
                 <div id="app-split-panels">
                     <SplitPane split="vertical" minSize={200} defaultSize={300} style={{ height: "calc(100% - 46px)" }}>
@@ -64,7 +72,7 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
     }
 
     private onRefreshClick() {
-        ipcRenderer.send("refresh-files");
+        ipcRenderer.send("trigger-refresh-files");
     }
 
     private onExecuteClick() {
@@ -72,6 +80,10 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
     }
 
     private onSaveClick() {
-        // TODO
+        ipcRenderer.send("trigger-save");
+    }
+
+    private onStopClick() {
+        ipcRenderer.send("trigger-stop");
     }
 }
