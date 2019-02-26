@@ -16,20 +16,20 @@ import AddBoxIcon from "@material-ui/icons/AddBox";
 import Typography from "@material-ui/core/Typography";
 import LoopIcon from "@material-ui/icons/Loop";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
-
+import Fab from "@material-ui/core/Fab";
+import AddIcon from "@material-ui/icons/Add";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 
 
-
 interface ILeftPanelState {
     data: ProjectList;
-    collapse: Map<string, boolean>;
     selected: string;
     anchorProjectMenuEl: HTMLElement | null;
     anchorFileMenuEl: HTMLElement | null;
     menuX: number;
     menuY: number;
+    activeProject: string;
 }
 
 export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
@@ -39,9 +39,9 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
     constructor(props: {}) {
         super(props);
         this.state = {
+            activeProject: "",
             anchorFileMenuEl: null,
             anchorProjectMenuEl: null,
-            collapse: new Map(),
             data: new ProjectList(),
             menuX: 0,
             menuY: 0,
@@ -49,11 +49,7 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
         };
 
         ipcRenderer.on("files-refreshed" , (event: Event, data: ProjectList) => {
-            const collapse = new Map();
-            data.Projects.forEach((project: Project) => {
-                collapse.set(project.Path, true);
-            });
-            this.setState({ data, collapse, selected: "" });
+            this.setState({ data, selected: "" });
         });
     }
 
@@ -73,6 +69,12 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
                     <List component="nav">
                         {this.refreshProjects()}
                     </List>
+                    <Fab color="primary" aria-label="Add" style={{
+                        left: 20,
+                        position: "absolute",
+                        top: "calc(100% - 70px)"}}>
+                        <AddIcon />
+                    </Fab>
                     <Menu
                         id="project-menu"
                         anchorEl={anchorProjectMenuEl}
@@ -132,10 +134,10 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
                             <FolderIcon />
                         </ListItemIcon>
                         <ListItemText inset primary={p.Name} />
-                        {this.state.collapse.get(p.Path) ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        {this.state.activeProject === p.Path ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse
-                        in={this.state.collapse.get(p.Path)}
+                        in={this.state.activeProject === p.Path}
                         timeout="auto"
                         unmountOnExit
                         key={p.Name + "#collapse"}>
@@ -168,11 +170,8 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
     }
 
     private handleProjectClick(project: Project) {
-        this.setState((prevState, props) => {
-            prevState.collapse.set(project.Path, !this.state.collapse.get(project.Path));
-            return {
-                collapse: prevState.collapse,
-            };
+        this.setState({
+            activeProject: project.Path,
         });
     }
 
