@@ -22,13 +22,14 @@ import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 
 interface ILeftPanelState {
-    data: ProjectList;
-    selected: string;
+    activeProject: string;
     anchorProjectMenuEl: HTMLElement | null;
     anchorFileMenuEl: HTMLElement | null;
+    data: ProjectList;
+    menuSelectedProject: string;
     menuX: number;
     menuY: number;
-    activeProject: string;
+    selectedFile: string;
 }
 
 export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
@@ -42,9 +43,10 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
             anchorFileMenuEl: null,
             anchorProjectMenuEl: null,
             data: new ProjectList(),
+            menuSelectedProject: "",
             menuX: 0,
             menuY: 0,
-            selected: "",
+            selectedFile: "",
         };
 
         ipcRenderer.on("trigger-refresh-files" , (event: Event) => {
@@ -52,7 +54,7 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
         });
 
         ipcRenderer.on("files-refreshed" , (event: Event, data: ProjectList) => {
-            this.setState({ data, selected: "", activeProject: "" });
+            this.setState({ data, selectedFile: "", activeProject: "" });
             ipcRenderer.send("open-file", "");
         });
     }
@@ -71,7 +73,7 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
                 }} ref={this.divMenuPositionRef}></div>
                 <div id="file-container">
                     <List component="nav">
-                        {this.refreshProjects()}
+                        {this.buildProjects()}
                     </List>
                     <Menu
                         id="project-menu"
@@ -79,13 +81,13 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
                         open={Boolean(anchorProjectMenuEl)}
                         onClose={() => this.handleMenuClose()}
                     >
-                        <MenuItem onClick={this.handleMenuClose}>
+                        <MenuItem onClick={() => this.handleMenuRefreshProject()}>
                             <ListItemIcon>
                                 <LoopIcon />
                             </ListItemIcon>
                             <Typography variant="inherit">Recharger</Typography>
                         </MenuItem>
-                        <MenuItem onClick={this.handleMenuClose}>
+                        <MenuItem onClick={() => this.handleMenuNewFile()}>
                             <ListItemIcon>
                                 <AddBoxIcon />
                             </ListItemIcon>
@@ -98,13 +100,13 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
                         open={Boolean(anchorFileMenuEl)}
                         onClose={() => this.handleMenuClose()}
                     >
-                        <MenuItem onClick={this.handleMenuClose}>
+                        <MenuItem onClick={() => this.handleMenuRefreshFile()}>
                             <ListItemIcon>
                                 <LoopIcon />
                             </ListItemIcon>
                             <Typography variant="inherit">Recharger</Typography>
                         </MenuItem>
-                        <MenuItem onClick={this.handleMenuClose}>
+                        <MenuItem onClick={() => this.handleMenuDeleteFile()}>
                             <ListItemIcon>
                                 <DeleteForeverIcon />
                             </ListItemIcon>
@@ -120,14 +122,14 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
         ipcRenderer.send("refresh-files");
     }
 
-    private refreshProjects(): JSX.Element[] {
+    private buildProjects(): JSX.Element[] {
         return this.state.data.Projects.map((p, i) => {
             return (
                 <React.Fragment key={p.Name + "#fragment"}>
                     <ListItem
                         button onClick={() => this.handleProjectClick(p)}
                         key={p.Name}
-                        onContextMenu={(e) => this.handleProjectRightClick(e)}>
+                        onContextMenu={(e) => this.handleProjectRightClick(e, p)}>
                         <ListItemIcon>
                             <FolderIcon />
                         </ListItemIcon>
@@ -140,7 +142,7 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
                         unmountOnExit
                         key={p.Name + "#collapse"}>
                         <List disablePadding key={p.Name + "#files"}>
-                            {this.refreshPythonFiles(p)}
+                            {this.buildPythonFiles(p)}
                         </List>
                     </Collapse>
                 </React.Fragment>
@@ -148,13 +150,13 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
         });
     }
 
-    private refreshPythonFiles(project: Project): JSX.Element[] {
+    private buildPythonFiles(project: Project): JSX.Element[] {
         return project.PythonFiles.map((f, i) => {
             return (
                 <ListItem
-                    onContextMenu={(e) => this.handleFileRightClick(e)}
+                    onContextMenu={(e) => this.handleFileRightClick(e, f)}
                     onClick={() => this.handleFileClick(f)}
-                    selected={this.state.selected === f.Path}
+                    selected={this.state.selectedFile === f.Path}
                     button
                     key={project.Name + "#files#" + f.Name}
                     style={{ paddingLeft: 30 }}>
@@ -175,26 +177,28 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
 
     private handleFileClick(file: PythonFile) {
         this.setState({
-            selected: file.Path,
+            selectedFile: file.Path,
         });
         ipcRenderer.send("open-file", file.Path);
     }
 
-    private handleProjectRightClick(event: MouseEvent<HTMLElement>) {
+    private handleProjectRightClick(event: MouseEvent<HTMLElement>, project: Project) {
         this.setState({
             anchorFileMenuEl: null,
             anchorProjectMenuEl: this.divMenuPositionRef.current!,
+            menuSelectedProject: project.Path,
             menuX: event.clientX,
             menuY: event.clientY,
         });
     }
 
-    private handleFileRightClick(event: MouseEvent<HTMLElement>) {
+    private handleFileRightClick(event: MouseEvent<HTMLElement>, pythonFile: PythonFile) {
         this.setState({
             anchorFileMenuEl: this.divMenuPositionRef.current!,
             anchorProjectMenuEl: null,
             menuX: event.clientX,
             menuY: event.clientY,
+            selectedFile: pythonFile.Path,
         });
     }
 
@@ -205,5 +209,27 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
             menuX: 0,
             menuY: 0,
         });
+    }
+
+    private handleMenuRefreshProject() {
+        console.log("Refresh project: " + this.state.menuSelectedProject);
+        this.setState({ menuSelectedProject: "", activeProject: this.state.menuSelectedProject});
+        this.handleMenuClose();
+    }
+
+    private handleMenuNewFile() {
+        console.log("New file into project: " + this.state.menuSelectedProject);
+        this.setState({ menuSelectedProject: "", activeProject: this.state.menuSelectedProject});
+        this.handleMenuClose();
+    }
+
+    private handleMenuRefreshFile() {
+        console.log("Refresh file: " + this.state.selectedFile);
+        this.handleMenuClose();
+    }
+
+    private handleMenuDeleteFile() {
+        console.log("Delete file: " + this.state.selectedFile);
+        this.handleMenuClose();
     }
 }

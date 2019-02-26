@@ -67,6 +67,7 @@ export default class EditorPanel extends React.Component<{}, IEditorPanelState> 
         const editorContainer = this.editorRef.current!;
         this.editor = monaco.editor.create(editorContainer, {
             language: "python",
+            readOnly: true,
             theme: "vs-dark",
             value: this.state.code.get(this.state.currentFile)!,
         });
