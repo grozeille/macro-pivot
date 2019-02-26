@@ -47,8 +47,13 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
             selected: "",
         };
 
+        ipcRenderer.on("trigger-refresh-files" , (event: Event) => {
+            ipcRenderer.send("refresh-files");
+        });
+
         ipcRenderer.on("files-refreshed" , (event: Event, data: ProjectList) => {
-            this.setState({ data, selected: "" });
+            this.setState({ data, selected: "", activeProject: "" });
+            ipcRenderer.send("open-file", "");
         });
     }
 

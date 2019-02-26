@@ -5,6 +5,7 @@ import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ResizeObserver } from "resize-observer";
 import {ipcRenderer, remote} from "electron";
 import { PythonFileContent } from "../../common/PythonFileContent";
+import { ProjectList } from "../../common/ProjectList";
 
 interface IEditorPanelState {
     code: Map<string, string>;
@@ -20,20 +21,14 @@ export default class EditorPanel extends React.Component<{}, IEditorPanelState> 
         super(props);
 
         const code = new Map();
-        code.set("demo", [
-            "import xlwings as xw",
-            "import sys",
-            "",
-            "def run_macro(file_path):",
-            "    print(file_path)",
-            "    #wb = xw.Book(file_path)",
-            "    #sht = wb.sheets['Sheet1']",
-            "",
-            "if __name__ == '__main__':",
-            "   file_path = sys.argv[1]",
-            "",
-            "   run_macro(file_path)"].join("\n"));
-        this.state = { code, currentFile: "demo" };
+        code.set("", "");
+        this.state = { code, currentFile: "" };
+
+        ipcRenderer.on("files-refreshed" , (event: Event, data: ProjectList) => {
+            const newCode = new Map();
+            newCode.set("", "");
+            this.setState({ code, currentFile: "" });
+        });
 
         ipcRenderer.on("file-opened" , (event: Event, pythonFile: PythonFileContent) => {
             // don't override if already opened
@@ -52,7 +47,7 @@ export default class EditorPanel extends React.Component<{}, IEditorPanelState> 
             });
             const currentCode = this.state.code.get(this.state.currentFile)!;
             this.editor!.setValue(currentCode);
-            // this.forceUpdate();
+            this.editor!.updateOptions({ readOnly: pythonFile.Path === "" });
         });
     }
 

@@ -172,9 +172,13 @@ function handleOpenFile(window: Electron.BrowserWindow) {
         }
         lastOpenedFiled = filePath;
 
-        const contents = readFileSync(filePath, "utf8");
-        const pythonFileContent = new PythonFileContent(contents, filePath);
-        window.webContents.send("file-opened" , pythonFileContent);
+        if (filePath !== "") {
+            const contents = readFileSync(filePath, "utf8");
+            const pythonFileContent = new PythonFileContent(contents, filePath);
+            window.webContents.send("file-opened" , pythonFileContent);
+        } else {
+            window.webContents.send("file-opened" , new PythonFileContent("", ""));
+        }
     });
 }
 

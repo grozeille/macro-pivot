@@ -9,7 +9,13 @@ import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
 import CreateNewFolderIcon from "@material-ui/icons/CreateNewFolder";
 import {ipcRenderer, remote} from "electron";
-import Button from "@material-ui/core/Button";
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import blue from "@material-ui/core/colors/blue";
 import pink from "@material-ui/core/colors/pink";
@@ -26,6 +32,9 @@ const theme = createMuiTheme({
 
 interface IAppPanelState {
     execution: boolean;
+    createNewProjectDialog: boolean;
+    createNewProjectName: string;
+    refreshFilesDialog: boolean;
 }
 
 export default class AppPanel extends React.Component<{}, IAppPanelState> {
@@ -33,7 +42,10 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
     constructor(props: {}) {
         super(props);
         this.state = {
+            createNewProjectDialog: false,
+            createNewProjectName: "",
             execution: false,
+            refreshFilesDialog: false,
         };
 
         ipcRenderer.on("trigger-execute", (event: Event) => {
@@ -97,17 +109,99 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
                             </SplitPane>
                         </SplitPane>
                     </div>
+
+                    <Dialog
+                    open={this.state.createNewProjectDialog}
+                    onClose={() => this.handleCloseNewProjectDialog()}
+                    aria-labelledby="form-dialog-title"
+                    maxWidth="sm"
+                    fullWidth={true}
+                    >
+                    <DialogTitle id="form-dialog-title">Nouveau Projet</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                        Choisir un nom de projet.
+                        </DialogContentText>
+                        <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        label="Nom du projet"
+                        fullWidth
+                        type="text"
+                        onChange={(event) => this.setState({ createNewProjectName: event.currentTarget.value})}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => this.handleCloseNewProjectDialog()} color="primary">
+                        Annuler
+                        </Button>
+                        <Button onClick={() => this.handleCreateNewProject()} color="primary">
+                        Créer
+                        </Button>
+                    </DialogActions>
+                    </Dialog>
+
+                    <Dialog
+                    open={this.state.refreshFilesDialog}
+                    onClose={() => this.handleCloseRefreshFilesDialog()}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                    >
+                    <DialogTitle id="alert-dialog-title">Tout Recharger ?</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                        L'application va recharger les fichiers depuis le système de fichier.
+                        Toutes les modifications non-sauvegardées vont être perdues.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => this.handleCloseRefreshFilesDialog()} color="primary">
+                        Annuler
+                        </Button>
+                        <Button onClick={() => this.handleRefresh()} color="primary" autoFocus>
+                        Tout Recharger
+                        </Button>
+                    </DialogActions>
+                    </Dialog>
                 </div>
             </MuiThemeProvider>
         );
     }
 
+    private handleCloseRefreshFilesDialog() {
+        this.setState({ refreshFilesDialog: false });
+    }
+
+    private handleRefresh() {
+        this.setState({ refreshFilesDialog: false });
+        ipcRenderer.send("trigger-refresh-files");
+    }
+
     private onCreateNewProjectClick() {
-        ipcRenderer.send("trigger-create-new-project");
+        this.setState({
+            createNewProjectDialog: true,
+            createNewProjectName: "",
+        });
+    }
+
+    private handleCloseNewProjectDialog() {
+        this.setState({
+            createNewProjectDialog: false,
+            createNewProjectName: "",
+        });
+    }
+
+    private handleCreateNewProject() {
+        ipcRenderer.send("trigger-create-new-project", this.state.createNewProjectName);
+        this.setState({
+            createNewProjectDialog: false,
+            createNewProjectName: "",
+        });
     }
 
     private onRefreshClick() {
-        ipcRenderer.send("trigger-refresh-files");
+        this.setState({ refreshFilesDialog: true });
     }
 
     private onExecuteClick() {
