@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEvent } from "react";
 import {ipcRenderer, remote} from "electron";
 import { ProjectList } from "../../common/ProjectList";
 import { PythonFile } from "../../common/PythonFile";
@@ -10,21 +10,41 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import FolderIcon from "@material-ui/icons/Folder";
 import CodeIcon from "@material-ui/icons/Code";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import AddBoxIcon from "@material-ui/icons/AddBox";
+import Typography from "@material-ui/core/Typography";
+import LoopIcon from "@material-ui/icons/Loop";
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
+
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+
+
 
 interface ILeftPanelState {
     data: ProjectList;
     collapse: Map<string, boolean>;
     selected: string;
+    anchorProjectMenuEl: HTMLElement | null;
+    anchorFileMenuEl: HTMLElement | null;
+    menuX: number;
+    menuY: number;
 }
 
 export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
+
+    private divMenuPositionRef = React.createRef<HTMLDivElement>();
+
     constructor(props: {}) {
         super(props);
         this.state = {
+            anchorFileMenuEl: null,
+            anchorProjectMenuEl: null,
             collapse: new Map(),
             data: new ProjectList(),
+            menuX: 0,
+            menuY: 0,
             selected: "",
         };
 
@@ -38,12 +58,59 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
     }
 
     public render() {
+        const { anchorFileMenuEl, anchorProjectMenuEl } = this.state;
+
         return (
             <div id="file-panel">
+                <div id="menu-position" style={{
+                    height: 0,
+                    left: this.state.menuX,
+                    position: "absolute",
+                    top: this.state.menuY,
+                    width: 0,
+                }} ref={this.divMenuPositionRef}></div>
                 <div id="file-container">
                     <List component="nav">
                         {this.refreshProjects()}
                     </List>
+                    <Menu
+                        id="project-menu"
+                        anchorEl={anchorProjectMenuEl}
+                        open={Boolean(anchorProjectMenuEl)}
+                        onClose={() => this.handleMenuClose()}
+                    >
+                        <MenuItem onClick={this.handleMenuClose}>
+                            <ListItemIcon>
+                                <LoopIcon />
+                            </ListItemIcon>
+                            <Typography variant="inherit">Recharger</Typography>
+                        </MenuItem>
+                        <MenuItem onClick={this.handleMenuClose}>
+                            <ListItemIcon>
+                                <AddBoxIcon />
+                            </ListItemIcon>
+                            <Typography variant="inherit">Nouveau fichier</Typography>
+                        </MenuItem>
+                    </Menu>
+                    <Menu
+                        id="file-menu"
+                        anchorEl={anchorFileMenuEl}
+                        open={Boolean(anchorFileMenuEl)}
+                        onClose={() => this.handleMenuClose()}
+                    >
+                        <MenuItem onClick={this.handleMenuClose}>
+                            <ListItemIcon>
+                                <LoopIcon />
+                            </ListItemIcon>
+                            <Typography variant="inherit">Recharger</Typography>
+                        </MenuItem>
+                        <MenuItem onClick={this.handleMenuClose}>
+                            <ListItemIcon>
+                                <DeleteForeverIcon />
+                            </ListItemIcon>
+                            <Typography variant="inherit">Supprimer</Typography>
+                        </MenuItem>
+                    </Menu>
                 </div>
             </div>
         );
@@ -57,12 +124,15 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
         return this.state.data.Projects.map((p, i) => {
             return (
                 <React.Fragment key={p.Name + "#fragment"}>
-                    <ListItem button onClick={() => this.handleProjectClick(p)} key={p.Name}>
+                    <ListItem
+                        button onClick={() => this.handleProjectClick(p)}
+                        key={p.Name}
+                        onContextMenu={(e) => this.handleProjectRightClick(e)}>
                         <ListItemIcon>
                             <FolderIcon />
                         </ListItemIcon>
                         <ListItemText inset primary={p.Name} />
-                        {this.state.collapse.get(p.Path) ? <ExpandLess /> : <ExpandMore />}
+                        {this.state.collapse.get(p.Path) ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </ListItem>
                     <Collapse
                         in={this.state.collapse.get(p.Path)}
@@ -82,6 +152,7 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
         return project.PythonFiles.map((f, i) => {
             return (
                 <ListItem
+                    onContextMenu={(e) => this.handleFileRightClick(e)}
                     onClick={() => this.handleFileClick(f)}
                     selected={this.state.selected === f.Path}
                     button
@@ -110,5 +181,32 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
             selected: file.Path,
         });
         ipcRenderer.send("open-file", file.Path);
+    }
+
+    private handleProjectRightClick(event: MouseEvent<HTMLElement>) {
+        this.setState({
+            anchorFileMenuEl: null,
+            anchorProjectMenuEl: this.divMenuPositionRef.current!,
+            menuX: event.clientX,
+            menuY: event.clientY,
+        });
+    }
+
+    private handleFileRightClick(event: MouseEvent<HTMLElement>) {
+        this.setState({
+            anchorFileMenuEl: this.divMenuPositionRef.current!,
+            anchorProjectMenuEl: null,
+            menuX: event.clientX,
+            menuY: event.clientY,
+        });
+    }
+
+    private handleMenuClose() {
+        this.setState({
+            anchorFileMenuEl: null,
+            anchorProjectMenuEl: null,
+            menuX: 0,
+            menuY: 0,
+        });
     }
 }

@@ -668,6 +668,14 @@
     prop-types "^15.6.0"
     react-is "^16.6.3"
 
+"@mdi/js@^3.4.93":
+  version "3.4.93"
+  resolved "https://registry.yarnpkg.com/@mdi/js/-/js-3.4.93.tgz#998c64d15668de156ef35ec0c8c50f39e7808ebd"
+
+"@mdi/react@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@mdi/react/-/react-1.1.0.tgz#22b014e40152adbe0d7d36631fc9979854603c7a"
+
 "@posthtml/esm@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@posthtml/esm/-/esm-1.0.0.tgz#09bcb28a02438dcee22ad1970ca1d85a000ae0cf"

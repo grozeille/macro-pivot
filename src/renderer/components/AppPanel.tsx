@@ -7,6 +7,7 @@ import LoopIcon from "@material-ui/icons/Loop";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
+import CreateNewFolderIcon from "@material-ui/icons/CreateNewFolder";
 import {ipcRenderer, remote} from "electron";
 import Button from "@material-ui/core/Button";
 
@@ -38,6 +39,10 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
                     <Button style={{ borderRadius: 0 }} onClick={() => this.onRefreshClick()}>
                         <LoopIcon style={{ marginRight: 5}} ></LoopIcon>
                         Rafraichir
+                    </Button>
+                    <Button style={{ borderRadius: 0 }} onClick={() => this.onCreateNewProjectClick()}>
+                        <CreateNewFolderIcon style={{ marginRight: 5}} ></CreateNewFolderIcon>
+                        Nouveau Projet
                     </Button>
                     <Button style={{ borderRadius: 0 }} onClick={() => this.onSaveClick()}>
                         <GetAppIcon style={{ marginRight: 5}} ></GetAppIcon>
@@ -73,6 +78,10 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
 
     private onRefreshClick() {
         ipcRenderer.send("trigger-refresh-files");
+    }
+
+    private onCreateNewProjectClick() {
+        ipcRenderer.send("trigger-create-new-project");
     }
 
     private onExecuteClick() {

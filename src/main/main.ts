@@ -18,7 +18,11 @@ let lastOpenedFiled: string | null = null;
 let pythonProcess: ChildProcess | null = null;
 
 function createWindow() {
-    mainWindow = new BrowserWindow({width: 1000, height: 800});
+    mainWindow = new BrowserWindow({
+        height: 800,
+        title: "Excel Python Macro Editor",
+        width: 1000,
+    });
 
 
     if (isDevelopment) {
