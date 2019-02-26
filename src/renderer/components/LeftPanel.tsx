@@ -21,7 +21,6 @@ import AddIcon from "@material-ui/icons/Add";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 
-
 interface ILeftPanelState {
     data: ProjectList;
     selected: string;
@@ -69,12 +68,6 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
                     <List component="nav">
                         {this.refreshProjects()}
                     </List>
-                    <Fab color="primary" aria-label="Add" style={{
-                        left: 20,
-                        position: "absolute",
-                        top: "calc(100% - 70px)"}}>
-                        <AddIcon />
-                    </Fab>
                     <Menu
                         id="project-menu"
                         anchorEl={anchorProjectMenuEl}
