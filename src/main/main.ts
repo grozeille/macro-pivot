@@ -1,6 +1,6 @@
 import {app, BrowserWindow, ipcMain} from "electron";
 import * as path from "path";
-import { lstatSync, readdirSync, readFileSync } from "fs";
+import { lstatSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { format as formatUrl } from "url";
 import {MacroArguments} from "../common/MacroArguments";
 import {spawn, ChildProcess} from "child_process";
@@ -79,6 +79,9 @@ function getWorkspacePath(): string {
 }
 
 function handleExecute(window: Electron.BrowserWindow) {
+    ipcMain.on("trigger-execute", (event: any) => {
+        window.webContents.send("trigger-execute");
+    });
     ipcMain.on("execute", (event: any, argument: MacroArguments) => {
         const rootPath = getAppPath();
         console.log("base path: ", rootPath);
@@ -182,13 +185,7 @@ function handleOpenFile(window: Electron.BrowserWindow) {
     });
 }
 
-function handleTriggerExecute(window: Electron.BrowserWindow) {
-    ipcMain.on("trigger-execute", (event: any) => {
-        window.webContents.send("trigger-execute");
-    });
-}
-
-function handleTriggerStop(window: Electron.BrowserWindow) {
+function handleStop(window: Electron.BrowserWindow) {
     ipcMain.on("trigger-stop", (event: any) => {
         window.webContents.send("trigger-stop");
     });
@@ -199,13 +196,23 @@ function handleTriggerStop(window: Electron.BrowserWindow) {
     });
 }
 
+function handleSave(window: Electron.BrowserWindow) {
+    ipcMain.on("trigger-save", (event: any) => {
+        window.webContents.send("trigger-save");
+    });
+    ipcMain.on("save", (event: any, pythonFileContent: PythonFileContent) => {
+        writeFileSync(pythonFileContent.Path, pythonFileContent.Content, { encoding: "utf8"});
+        window.webContents.send("saved", pythonFileContent.Path);
+    });
+}
+
 app.on("ready", () => {
     const w = createWindow();
     handleExecute(w);
     handleRefreshFiles(w);
     handleOpenFile(w);
-    handleTriggerExecute(w);
-    handleTriggerStop(w);
+    handleStop(w);
+    handleSave(w);
 });
 
 app.on("window-all-closed", () => {

@@ -35,6 +35,8 @@ v1
 
 * save a file
 * add a new package / file
+* dirty state of the editor (grayed save button)
+* execute a macro if not saved (or save before execute)
 
 v2
 

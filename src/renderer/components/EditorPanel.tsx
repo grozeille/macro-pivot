@@ -7,12 +7,7 @@ import {ipcRenderer, remote} from "electron";
 import { PythonFileContent } from "../../common/PythonFileContent";
 import { ProjectList } from "../../common/ProjectList";
 
-interface IEditorPanelState {
-    code: Map<string, string>;
-    currentFile: string;
-}
-
-export default class EditorPanel extends React.Component<{}, IEditorPanelState> {
+export default class EditorPanel extends React.Component<{}, {}> {
 
     private editorRef = React.createRef<HTMLDivElement>();
     private editor: monaco.editor.IStandaloneCodeEditor | undefined;
@@ -20,34 +15,33 @@ export default class EditorPanel extends React.Component<{}, IEditorPanelState> 
     constructor(props: {}) {
         super(props);
 
-        const code = new Map();
-        code.set("", "");
-        this.state = { code, currentFile: "" };
-
         ipcRenderer.on("files-refreshed" , (event: Event, data: ProjectList) => {
-            const newCode = new Map();
-            newCode.set("", "");
-            this.setState({ code, currentFile: "" });
+            this.editor!.setModel(null);
+            monaco.editor.getModels().forEach((model: monaco.editor.ITextModel) => {
+                model.dispose();
+            });
         });
 
         ipcRenderer.on("file-opened" , (event: Event, pythonFile: PythonFileContent) => {
-            // don't override if already opened
-            if (!this.state.code.has(pythonFile.Path)) {
+            // load the file if it's the first time. if not, keep the in-memory version
+            if (!monaco.editor.getModel(monaco.Uri.file(pythonFile.Path))) {
                 // load the new text
-                this.state.code.set(pythonFile.Path, pythonFile.Content);
+                const textModel = monaco.editor.createModel(
+                    pythonFile.Content,
+                    "python",
+                    monaco.Uri.file(pythonFile.Path));
             }
 
-            // keep the previous text
-            if (this.state.currentFile !== pythonFile.Path) {
-                this.state.code.set(this.state.currentFile, this.editor!.getValue());
-            }
-
-            this.setState({
-                currentFile: pythonFile.Path,
-            });
-            const currentCode = this.state.code.get(this.state.currentFile)!;
-            this.editor!.setValue(currentCode);
+            this.editor!.setModel(monaco.editor.getModel(monaco.Uri.file(pythonFile.Path)));
             this.editor!.updateOptions({ readOnly: pythonFile.Path === "" });
+        });
+
+        ipcRenderer.on("trigger-save" , (event: Event, data: ProjectList) => {
+            if (this.editor!.getModel()) {
+                ipcRenderer.send(
+                    "save",
+                    new PythonFileContent(this.editor!.getModel()!.getValue(), this.editor!.getModel()!.uri.fsPath));
+            }
         });
     }
 
@@ -69,7 +63,7 @@ export default class EditorPanel extends React.Component<{}, IEditorPanelState> 
             language: "python",
             readOnly: true,
             theme: "vs-dark",
-            value: this.state.code.get(this.state.currentFile)!,
+            value: "",
         });
 
         monaco.editor.setTheme("chrome");
