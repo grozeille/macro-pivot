@@ -1,5 +1,5 @@
 import React from "react";
-import {ipcRenderer, remote} from "electron";
+import { remote } from "electron";
 import PubSub from "pubsub-js";
 
 const dialog = remote.dialog;

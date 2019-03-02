@@ -4,7 +4,6 @@ import PubSub from "pubsub-js";
 // import * as monaco from "monaco-editor";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ResizeObserver } from "resize-observer";
-import {ipcRenderer, remote} from "electron";
 import { PythonFileContent } from "../../common/PythonFileContent";
 import { ProjectList } from "../../common/ProjectList";
 
@@ -25,14 +24,14 @@ export default class EditorPanel extends React.Component<{}, {}> {
             }
         });
 
-        ipcRenderer.on("files-refreshed" , (event: Event, data: ProjectList) => {
+        PubSub.subscribe("files-refreshed" , (message: string, data: ProjectList) => {
             this.editor!.setModel(null);
             monaco.editor.getModels().forEach((model: monaco.editor.ITextModel) => {
                 model.dispose();
             });
         });
 
-        ipcRenderer.on("file-opened" , (event: Event, pythonFile: PythonFileContent) => {
+        PubSub.subscribe("file-opened", (message: string, pythonFile: PythonFileContent) => {
             // load the file if it's the first time. if not, keep the in-memory version
             if (!monaco.editor.getModel(monaco.Uri.file(pythonFile.Path))) {
                 // load the new text
@@ -46,11 +45,13 @@ export default class EditorPanel extends React.Component<{}, {}> {
             this.editor!.updateOptions({ readOnly: pythonFile.Path === "" });
         });
 
-        ipcRenderer.on("trigger-save" , (event: Event, data: ProjectList) => {
-            if (this.editor!.getModel()) {
-                ipcRenderer.send(
-                    "save",
-                    new PythonFileContent(this.editor!.getModel()!.getValue(), this.editor!.getModel()!.uri.fsPath));
+        PubSub.subscribe("save" , (message: string, file: PythonFileContent | null) => {
+            if (!file) {
+                if (this.editor!.getModel()) {
+                    PubSub.publish(
+                        "save",
+                        new PythonFileContent(this.editor!.getModel()!.getValue(), this.editor!.getModel()!.uri.fsPath));
+                }
             }
         });
     }

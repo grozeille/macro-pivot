@@ -1,5 +1,4 @@
 import React, { MouseEvent } from "react";
-import {ipcRenderer, remote} from "electron";
 import { ProjectList } from "../../common/ProjectList";
 import { PythonFile } from "../../common/PythonFile";
 import { Project } from "../../common/Project";
@@ -16,8 +15,6 @@ import AddBoxIcon from "@material-ui/icons/AddBox";
 import Typography from "@material-ui/core/Typography";
 import LoopIcon from "@material-ui/icons/Loop";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
-import Fab from "@material-ui/core/Fab";
-import AddIcon from "@material-ui/icons/Add";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 
@@ -49,13 +46,8 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
             selectedFile: "",
         };
 
-        ipcRenderer.on("trigger-refresh-files" , (event: Event) => {
-            ipcRenderer.send("refresh-files");
-        });
-
-        ipcRenderer.on("files-refreshed" , (event: Event, data: ProjectList) => {
+        PubSub.subscribe("files-refreshed" , (message: string, data: ProjectList) => {
             this.setState({ data, selectedFile: "", activeProject: "" });
-            ipcRenderer.send("open-file", "");
         });
     }
 
@@ -119,7 +111,7 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
     }
 
     public componentDidMount() {
-        ipcRenderer.send("refresh-files");
+        PubSub.publish("refresh-files", null);
     }
 
     private buildProjects(): JSX.Element[] {
@@ -179,7 +171,7 @@ export default class LeftPanel extends React.Component<{}, ILeftPanelState> {
         this.setState({
             selectedFile: file.Path,
         });
-        ipcRenderer.send("open-file", file.Path);
+        PubSub.publish("open-file", file.Path);
     }
 
     private handleProjectRightClick(event: MouseEvent<HTMLElement>, project: Project) {

@@ -153,9 +153,6 @@ function handleExecute(window: Electron.BrowserWindow) {
 }
 
 function handleRefreshFiles(window: Electron.BrowserWindow) {
-    ipcMain.on("trigger-refresh-files", (event: any) => {
-        window.webContents.send("trigger-refresh-files");
-    });
     ipcMain.on("refresh-files", (event: any) => {
         const workspacePath = getWorkspacePath();
 
@@ -202,9 +199,6 @@ function handleOpenFile(window: Electron.BrowserWindow) {
 }
 
 function handleStop(window: Electron.BrowserWindow) {
-    ipcMain.on("trigger-stop", (event: any) => {
-        window.webContents.send("trigger-stop");
-    });
     ipcMain.on("stop", (event: any) => {
         if (pythonProcess !== null) {
             pythonProcess.kill("-9");
@@ -213,9 +207,6 @@ function handleStop(window: Electron.BrowserWindow) {
 }
 
 function handleSave(window: Electron.BrowserWindow) {
-    ipcMain.on("trigger-save", (event: any) => {
-        window.webContents.send("trigger-save");
-    });
     ipcMain.on("save", (event: any, pythonFileContent: PythonFileContent) => {
         writeFileSync(pythonFileContent.Path, pythonFileContent.Content, { encoding: "utf8"});
         window.webContents.send("saved", pythonFileContent.Path);
@@ -223,7 +214,7 @@ function handleSave(window: Electron.BrowserWindow) {
 }
 
 function handleCreateNewProject(window: Electron.BrowserWindow) {
-    ipcMain.on("trigger-create-new-project", (event: any, projectName: string) => {
+    ipcMain.on("create-new-project", (event: any, projectName: string) => {
         try {
             mkdirSync(projectName);
           } catch (err) {

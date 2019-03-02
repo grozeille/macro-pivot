@@ -2,7 +2,6 @@ import React from "react";
 import LeftPanel from "../components/LeftPanel";
 import StdoutPanel from "../components/StdoutPanel";
 import CentralPanel from "../components/CentralPanel";
-import {ipcRenderer, Event} from "electron";
 import PubSub from "pubsub-js";
 import SplitPane from "react-split-pane";
 import LoopIcon from "@material-ui/icons/Loop";
@@ -37,6 +36,7 @@ interface IAppPanelState {
     createNewProjectDialog: boolean;
     createNewProjectName: string;
     refreshFilesDialog: boolean;
+    fileOpened: boolean;
 }
 
 export default class AppPanel extends React.Component<{}, IAppPanelState> {
@@ -49,6 +49,7 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
             createNewProjectDialog: false,
             createNewProjectName: "",
             execution: false,
+            fileOpened: false,
             refreshFilesDialog: false,
         };
 
@@ -61,6 +62,10 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
 
         PubSub.subscribe("process-end", (code: BigInteger) => {
             this.setState({ execution: false });
+        });
+
+        PubSub.subscribe("open-file", (message: string, file: string) => {
+            this.setState({ fileOpened: file !== "" });
         });
     }
 
@@ -84,21 +89,22 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
                         </Button>
                         <Button
                             style={{ borderRadius: 0 }}
-                            onClick={() => this.onSaveClick()}>
+                            onClick={() => this.onSaveClick()}
+                            disabled={!this.state.fileOpened}>
                             <GetAppIcon style={{ marginRight: 5}} ></GetAppIcon>
                             Sauvegarder
                         </Button>
                         <Button
                             style={{ borderRadius: 0 }}
                             onClick={() => this.onExecuteClick()}
-                            disabled={this.state.execution}>
+                            disabled={this.state.execution || !this.state.fileOpened}>
                             <PlayArrowIcon style={{ marginRight: 5}} ></PlayArrowIcon>
                             Executer
                         </Button>
                         <Button
                             style={{ borderRadius: 0 }}
                             onClick={() => this.onStopClick()}
-                            disabled={!this.state.execution}>
+                            disabled={!this.state.execution || !this.state.fileOpened}>
                             <StopIcon style={{ marginRight: 5}} ></StopIcon>
                             Stopper
                         </Button>
@@ -182,7 +188,7 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
 
     private handleRefresh() {
         this.setState({ refreshFilesDialog: false });
-        ipcRenderer.send("trigger-refresh-files");
+        PubSub.publish("refresh-files", null);
     }
 
     private onCreateNewProjectClick() {
@@ -200,7 +206,7 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
     }
 
     private handleCreateNewProject() {
-        ipcRenderer.send("trigger-create-new-project", this.state.createNewProjectName);
+        PubSub.publish("create-new-project", this.state.createNewProjectName);
         this.setState({
             createNewProjectDialog: false,
             createNewProjectName: "",
@@ -216,10 +222,10 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
     }
 
     private onSaveClick() {
-        ipcRenderer.send("trigger-save");
+        PubSub.publish("save", null);
     }
 
     private onStopClick() {
-        ipcRenderer.send("trigger-stop");
+        PubSub.publish("stop", null);
     }
 }
