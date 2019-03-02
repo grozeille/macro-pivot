@@ -1,6 +1,7 @@
 import {app, BrowserWindow, ipcMain} from "electron";
 import * as path from "path";
-import { lstatSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import * as winattr from "winattr";
+import { lstatSync, readdirSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { format as formatUrl } from "url";
 import {MacroArguments} from "../common/MacroArguments";
 import {spawn, ChildProcess} from "child_process";
@@ -79,10 +80,14 @@ function getWorkspacePath(): string {
 }
 
 function handleExecute(window: Electron.BrowserWindow) {
-    ipcMain.on("trigger-execute", (event: any) => {
-        window.webContents.send("trigger-execute");
-    });
     ipcMain.on("execute", (event: any, argument: MacroArguments) => {
+
+        if (argument.pythonFile.Path === "\\") {
+            window.webContents.send("process-end", 0);
+            return;
+        }
+
+        // compute the path of Python interpreter
         const rootPath = getAppPath();
         console.log("base path: ", rootPath);
 
@@ -97,13 +102,23 @@ function handleExecute(window: Electron.BrowserWindow) {
         const workspacePath = getWorkspacePath();
         console.log("workspace: ", workspacePath);
 
-        window.webContents.send("stdout" , null);
         window.webContents.send("stdout" , "Sortie:");
 
+        // make a temporary copy of the file
+        const pythonFileName = path.basename(argument.pythonFile.Path);
+        const pythonParentFolder = path.dirname(argument.pythonFile.Path);
+        const temporaryPythonFileName = ".tmp." + pythonFileName;
+        const temporaryPythonFilePath = path.join(pythonParentFolder, temporaryPythonFileName);
+
+        winattr.setSync(temporaryPythonFilePath, {hidden : false});
+        writeFileSync(temporaryPythonFilePath, argument.pythonFile.Content, { encoding: "utf8"});
+        winattr.setSync(temporaryPythonFilePath, {hidden : true});
+
+        // build the python script args
         const pythonExe = pythonPath + "\\python.exe";
         const args: ReadonlyArray<string> = [
-            workspacePath + "\\pivot\\macro.py",
-            argument.file,
+            temporaryPythonFilePath,
+            argument.exceFile,
         ];
         console.log("command line: ", pythonExe, args);
         window.webContents.send("stdout" , pythonExe + " " + args.join(" "));
@@ -159,7 +174,8 @@ function handleRefreshFiles(window: Electron.BrowserWindow) {
                 .map((name: string) => {
                     return new PythonFile(name, path.join(project.Path, name));
                 })
-                .filter(isFile);
+                .filter(isFile)
+                .filter((file: PythonFile) => !file.Name.startsWith("."));
                 return project;
             });
         const projectList = getDirectories(workspacePath);
@@ -206,6 +222,16 @@ function handleSave(window: Electron.BrowserWindow) {
     });
 }
 
+function handleCreateNewProject(window: Electron.BrowserWindow) {
+    ipcMain.on("trigger-create-new-project", (event: any, projectName: string) => {
+        try {
+            mkdirSync(projectName);
+          } catch (err) {
+            if (err.code !== "EEXIST") { throw err; }
+          }
+    });
+}
+
 app.on("ready", () => {
     const w = createWindow();
     handleExecute(w);
@@ -213,6 +239,7 @@ app.on("ready", () => {
     handleOpenFile(w);
     handleStop(w);
     handleSave(w);
+    handleCreateNewProject(w);
 });
 
 app.on("window-all-closed", () => {

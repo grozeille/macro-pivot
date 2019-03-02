@@ -1,4 +1,5 @@
 import React from "react";
+import PubSub from "pubsub-js";
 // import MonacoEditor from "react-monaco-editor";
 // import * as monaco from "monaco-editor";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
@@ -14,6 +15,15 @@ export default class EditorPanel extends React.Component<{}, {}> {
 
     constructor(props: {}) {
         super(props);
+
+        PubSub.subscribe("request-execute-script", (message: string) => {
+            if (this.editor!.getModel()) {
+                const pythonFile = new PythonFileContent(
+                    this.editor!.getModel()!.getValue(),
+                    this.editor!.getModel()!.uri.fsPath);
+                PubSub.publish("execute", pythonFile);
+            }
+        });
 
         ipcRenderer.on("files-refreshed" , (event: Event, data: ProjectList) => {
             this.editor!.setModel(null);

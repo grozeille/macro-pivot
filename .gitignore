@@ -5,3 +5,4 @@ dist
 build
 objectdb
 Python3
+.tmp.*

@@ -1,5 +1,5 @@
 import React from "react";
-import {ipcRenderer} from "electron";
+import PubSub from "pubsub-js";
 import * as he from "he";
 
 export default class StdoutPanel extends React.Component<{}, {}> {
@@ -10,7 +10,8 @@ export default class StdoutPanel extends React.Component<{}, {}> {
         super(props);
 
         this.handleSdout();
-        this.handleMacroExecuted();
+        this.handleExecute();
+        this.handleProcessEnd();
     }
 
     public render() {
@@ -25,22 +26,26 @@ export default class StdoutPanel extends React.Component<{}, {}> {
     }
 
     private handleSdout() {
-        ipcRenderer.on("stdout", (event: Event, data: string | null) => {
-            if (data == null) {
-                this.stdoutRef.current!.innerHTML = "";
-            } else {
-                console.log(data);
-                this.stdoutRef.current!.innerHTML =
-                    this.stdoutRef.current!.innerHTML +
-                    "<br/>" +
-                    he.encode(data).replace(/\n/g, "<br/>").replace(/\s/g, "&nbsp;");
-            }
+        PubSub.subscribe("stdout", (message: string, data: string) => {
+            console.log(data);
+            this.stdoutRef.current!.innerHTML =
+                this.stdoutRef.current!.innerHTML +
+                "<br/>" +
+                he.encode(data).replace(/\n/g, "<br/>").replace(/\s/g, "&nbsp;");
             this.stdoutRef.current!.scrollIntoView(false);
         });
     }
 
-    private handleMacroExecuted() {
-        ipcRenderer.on("process-end" , (event: Event, code: BigInteger) => {
+    private handleExecute() {
+        PubSub.subscribe("execute", (message: string, data: string) => {
+            console.log(data);
+            this.stdoutRef.current!.innerHTML = "";
+            this.stdoutRef.current!.scrollIntoView(false);
+        });
+    }
+
+    private handleProcessEnd() {
+        PubSub.subscribe("process-end" , (message: string, code: BigInteger) => {
             this.stdoutRef.current!.innerHTML =
                 this.stdoutRef.current!.innerHTML +
                 "<br/><br/> Macro terminée avec le code: " +

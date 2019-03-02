@@ -717,6 +717,10 @@
   version "15.5.9"
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.5.9.tgz#f2d14df87b0739041bc53a7d75e3d77d726a3ec0"
 
+"@types/pubsub-js@^1.5.18":
+  version "1.5.18"
+  resolved "https://registry.yarnpkg.com/@types/pubsub-js/-/pubsub-js-1.5.18.tgz#dd12284c5e93b39874e62675702bf50c6f55e9ec"
+
 "@types/q@^1.5.1":
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.1.tgz#48fd98c1561fe718b61733daed46ff115b496e18"
@@ -3027,6 +3031,10 @@ fsevents@^1.2.7:
     nan "^2.9.2"
     node-pre-gyp "^0.10.0"
 
+fswin@^2.16.1102:
+  version "2.17.1227"
+  resolved "https://registry.yarnpkg.com/fswin/-/fswin-2.17.1227.tgz#c598061e1ac1e7110e2e6ce884296efa27dc2507"
+
 function-bind@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
@@ -3252,6 +3260,12 @@ hash.js@^1.0.0, hash.js@^1.0.3:
 he@1.2.x, he@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
+
+hidefile@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/hidefile/-/hidefile-2.0.0.tgz#792cbfd661057deb83f069d611f4bc559a5d3a35"
+  dependencies:
+    winattr "^2.0.0"
 
 hmac-drbg@^1.0.0:
   version "1.0.1"
@@ -5261,6 +5275,10 @@ public-encrypt@^4.0.0:
     randombytes "^2.0.1"
     safe-buffer "^5.1.2"
 
+pubsub-js@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/pubsub-js/-/pubsub-js-1.7.0.tgz#eca97f9a4217bef62b2d3aaa1552005260cc2e49"
+
 pump@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/pump/-/pump-2.0.1.tgz#12399add6e4cf7526d973cbc8b5ce2e2908b3909"
@@ -6915,6 +6933,12 @@ widest-line@^2.0.0:
   resolved "https://registry.yarnpkg.com/widest-line/-/widest-line-2.0.1.tgz#7438764730ec7ef4381ce4df82fb98a53142a3fc"
   dependencies:
     string-width "^2.1.1"
+
+winattr@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/winattr/-/winattr-2.0.0.tgz#553d4e347c8c598551a8d7032eefe36526bd5026"
+  dependencies:
+    fswin "^2.16.1102"
 
 worker-farm@^1.5.2:
   version "1.6.0"

@@ -2,23 +2,25 @@ import React from "react";
 import LeftPanel from "../components/LeftPanel";
 import StdoutPanel from "../components/StdoutPanel";
 import CentralPanel from "../components/CentralPanel";
+import {ipcRenderer, Event} from "electron";
+import PubSub from "pubsub-js";
 import SplitPane from "react-split-pane";
 import LoopIcon from "@material-ui/icons/Loop";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import StopIcon from "@material-ui/icons/Stop";
 import CreateNewFolderIcon from "@material-ui/icons/CreateNewFolder";
-import {ipcRenderer, remote} from "electron";
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import blue from "@material-ui/core/colors/blue";
 import pink from "@material-ui/core/colors/pink";
+import { MacroService } from "../../common/MacroService";
 
 const theme = createMuiTheme({
     palette: {
@@ -39,6 +41,8 @@ interface IAppPanelState {
 
 export default class AppPanel extends React.Component<{}, IAppPanelState> {
 
+    private macroService: MacroService;
+
     constructor(props: {}) {
         super(props);
         this.state = {
@@ -48,11 +52,14 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
             refreshFilesDialog: false,
         };
 
-        ipcRenderer.on("trigger-execute", (event: Event) => {
+        this.macroService = new MacroService();
+        this.macroService.init();
+
+        PubSub.subscribe("execute", () => {
             this.setState({ execution: true });
         });
 
-        ipcRenderer.on("process-end", (event: Event, data: string) => {
+        PubSub.subscribe("process-end", (code: BigInteger) => {
             this.setState({ execution: false });
         });
     }
@@ -205,7 +212,7 @@ export default class AppPanel extends React.Component<{}, IAppPanelState> {
     }
 
     private onExecuteClick() {
-        ipcRenderer.send("trigger-execute");
+        PubSub.publish("execute", null);
     }
 
     private onSaveClick() {

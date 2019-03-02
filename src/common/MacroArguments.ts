@@ -1,3 +1,6 @@
+import { PythonFileContent } from "./PythonFileContent";
+
 export class MacroArguments {
-    public file!: string;
+    public exceFile!: string;
+    public pythonFile!: PythonFileContent;
 }
